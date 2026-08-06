@@ -112,7 +112,11 @@
             padding: 15px;
             border: 2px solid #d32f2f;
             border-radius: 8px;
-            background-color: #fffaf9;
+            /* Ubah warna background jadi transparan (merah 5%) */
+            background-color: rgba(211, 47, 47, 0.05); 
+            /* Memaksa teks menyesuaikan warna tema gelap/terang */
+            color: var(--tg-theme-text-color, #222); 
+        
         }
         .result-number {
             font-size: 28px;
