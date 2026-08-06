@@ -254,12 +254,16 @@
             return;
         }
 
-        // Membuka Direct Link Adsterra
-        window.open('https://www.effectivecpmnetwork.com/v57hpyqsni?key=18f295c0fbdb75af1d526fc6013f67a8', '_blank'); 
-        
+        // 1. Tampilkan efek loading terlebih dahulu agar transisi terasa mulus
         document.getElementById('btnHitung').style.display = 'none';
         document.getElementById('loading').style.display = 'block';
 
+        // 2. Gunakan API resmi Telegram untuk membuka Direct Link Adsterra
+        // Ini mencegah munculnya pop-up peringatan browser yang jelek
+        tg.openLink('https://www.effectivecpmnetwork.com/v57hpyqsni?key=18f295c0fbdb75af1d526fc6013f67a8'); 
+        
+        // 3. Sistem tetap menghitung di latar belakang selama 3 detik
+        // Saat pengguna menutup/kembali dari iklan, hasil sudah siap di layar
         setTimeout(function() {
             kalkulasiASCVD();
         }, 3000);
