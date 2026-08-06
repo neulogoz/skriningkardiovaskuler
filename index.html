@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-width=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kalkulator Risiko ASCVD</title>
     
-    <!-- Script Wajib dari Telegram -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
@@ -75,6 +74,31 @@
         button:hover {
             background-color: #b71c1c;
         }
+        
+        /* Desain Grid Tombol Sosial Media */
+        .share-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .share-btn {
+            padding: 10px;
+            font-size: 13px;
+            border-radius: 6px;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 0; /* Reset default button margin */
+        }
+        .btn-wa { background-color: #25D366; }
+        .btn-x { background-color: #000000; }
+        .btn-fb { background-color: #1877F2; }
+        .btn-ig { background-color: #E1306C; }
+        .btn-threads { background-color: #191919; }
+        .btn-tiktok { background-color: #ff0050; }
+
         #loading {
             text-align: center;
             display: none;
@@ -95,6 +119,13 @@
             font-weight: bold;
             color: #d32f2f;
             text-align: center;
+        }
+        .share-text {
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -181,6 +212,7 @@
         </select>
     </div>
 
+    <!-- Tombol ini memicu Direct Link Adsterra dan kalkulasi -->
     <button id="btnHitung" onclick="prosesHitung()">Hitung Risiko & Buka Hasil</button>
 
     <div id="loading">Memproses algoritma klinis... ⏳</div>
@@ -192,7 +224,17 @@
             <b>Rekomendasi:</b> <span id="recommendation"></span>
         </p>
         
-        <button style="background-color: #2e7d32;" onclick="kirimKeTelegram()">Kirim Hasil ke Telegram</button>
+        <div class="share-text">Bagikan hasil ini:</div>
+        
+        <!-- Grid Tombol Sosial Media -->
+        <div class="share-grid">
+            <button class="share-btn btn-wa" onclick="share('wa')">WhatsApp</button>
+            <button class="share-btn btn-x" onclick="share('x')">X (Twitter)</button>
+            <button class="share-btn btn-fb" onclick="share('fb')">Facebook</button>
+            <button class="share-btn btn-threads" onclick="share('threads')">Threads</button>
+            <button class="share-btn btn-ig" onclick="share('ig')">Instagram</button>
+            <button class="share-btn btn-tiktok" onclick="share('tiktok')">TikTok</button>
+        </div>
     </div>
 </div>
 
@@ -201,6 +243,10 @@
     tg.expand();
 
     let finalRiskScore = "";
+    
+    // GANTI dengan Username Bot asli Anda
+    const botUsername = "@UsernameBotAnda"; 
+    const linkBot = `https://t.me/${botUsername.replace('@', '')}`;
 
     function prosesHitung() {
         if(!document.getElementById('age').value || !document.getElementById('tc').value || !document.getElementById('sbp').value) {
@@ -208,7 +254,7 @@
             return;
         }
 
-        // Direct Link Adsterra
+        // Membuka Direct Link Adsterra
         window.open('https://www.effectivecpmnetwork.com/v57hpyqsni?key=18f295c0fbdb75af1d526fc6013f67a8', '_blank'); 
         
         document.getElementById('btnHitung').style.display = 'none';
@@ -254,9 +300,63 @@
         document.getElementById('recommendation').innerText = recoText;
     }
 
-    function kirimKeTelegram() {
-        let pesan = `📊 *Hasil Cek Risiko ASCVD 10-Tahun*\n\nRisiko Anda: *${finalRiskScore}*\n\n_Segera konsultasikan dengan dokter untuk langkah medis yang tepat._`;
-        tg.sendData(pesan);
+    // Fungsi canggih untuk menyalin teks (Fallback untuk IG dan TikTok)
+    function salinTeks(teks, callback) {
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(teks).then(callback);
+        } else {
+            let textArea = document.createElement("textarea");
+            textArea.value = teks;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                callback();
+            } catch (err) {
+                alert("Gagal menyalin otomatis, silakan copy manual.");
+            }
+            document.body.removeChild(textArea);
+        }
+    }
+
+    // Fungsi Utama Pembagian ke Media Sosial
+    function share(platform) {
+        let teksShare = `Saya baru mengecek Risiko Serangan Jantung (ASCVD) 10-Tahun menggunakan Kalkulator AHA/ACC.\n\nHasil Risiko Saya: ${finalRiskScore}\n\nCek punyamu secara gratis di sini: ${linkBot}`;
+        let url = "";
+
+        switch(platform) {
+            case 'wa':
+                url = `https://wa.me/?text=${encodeURIComponent(teksShare)}`;
+                window.open(url, '_blank');
+                break;
+            case 'x':
+                url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(teksShare)}`;
+                window.open(url, '_blank');
+                break;
+            case 'fb':
+                // Facebook web sering hanya mendeteksi tautan, bukan teks. Kita masukkan tautan bot.
+                url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(linkBot)}&quote=${encodeURIComponent(teksShare)}`;
+                window.open(url, '_blank');
+                break;
+            case 'threads':
+                url = `https://www.threads.net/intent/post?text=${encodeURIComponent(teksShare)}`;
+                window.open(url, '_blank');
+                break;
+            case 'ig':
+                // IG tidak punya fitur link share otomatis, jadi kita salin teks lalu buka instagram.com
+                salinTeks(teksShare, () => {
+                    alert("Teks berhasil disalin ke HP Anda!\n\nSilakan 'Paste' (Tempel) di Instagram Story atau Feed.");
+                    window.open('https://instagram.com', '_blank');
+                });
+                break;
+            case 'tiktok':
+                // Sama seperti IG, TikTok tidak izinkan isi caption via link.
+                salinTeks(teksShare, () => {
+                    alert("Teks berhasil disalin ke HP Anda!\n\nSilakan 'Paste' (Tempel) di video TikTok Anda.");
+                    window.open('https://tiktok.com', '_blank');
+                });
+                break;
+        }
     }
 </script>
 
